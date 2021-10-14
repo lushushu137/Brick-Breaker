@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-image: url(img/background.jpg);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+
+        * {
+            padding: 0px;
+            margin: 0px;
+
+        }
+
+        #outContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #outContainer #title {
+            width: 500px;
+            height: 50px;
+            top: 40px;
+            left: 150px;
+            position: relative;
+
+        }
+
+        #container {
+            width: 500px;
+            height: 500px;
+            border: solid 1px black;
+            position: relative;
+            margin-right: 120px;
+            background-color: rgba(255,255,255,0.3);
+        }
+        #bricks div {
+            width: 110px;
+            float: left;
+            height: 30px;
+            /* background-color: cadetblue; */
+            background-color: lightpink;
+            border-radius: 5%;
+            margin: 5px;
+
+        }
+
+        #ball {
+            width: 20px;
+            height: 20px;
+            background: url(img/ball.png) no-repeat;
+            border-radius: 50%;
+            position: absolute;
+            top: 180px;
+            left: 100px;
+        }
+
+        #bat {
+            width: 100px;
+            height: 20px;
+            background: url(img/bat.png) no-repeat;
+            position: absolute;
+            top: 480px;
+            left: 210px;
+        }
+
+        #startbtn {
+            width: 300px;
+            height: 90px;
+            margin: 0px auto;
+            position: absolute;
+            top: 200px;
+            left: 100px;
+            background: url(img/start.png) no-repeat;
+            border: none;
+        }
+
+
+        #sidebar {
+            width: 120px;
+            height: 500px;
+            background-color: rgba(255,255,255,0.3);
+            border: solid 1px;
+            margin-right: 10px;
+            border-radius: 20px;
+        }
+
+        #sidebar div {
+            width: 100px;
+            height: 30px;
+            margin: 10px auto;
+
+        }
+
+        #sidebar div img {
+            width: 100%;
+            height: 100%;
+        }
+
+        #sidebar #buttons {
+            width: 60px;
+            height: 170px;
+
+        }
+
+        #sidebar #buttons button {
+            width: 50px;
+            height: 50px;
+            margin: 10px 5px;
+
+
+        }
+
+        #sidebar #buttons #speedUp {
+            background-image: url(img/up.png);
+        }
+
+        #sidebar #buttons #speedDown {
+            background-image: url(img/down.png);
+        }
+
+
+        #sidebar #score {
+            width: 100%;
+            height: 100%;
+
+        }
+
+        #sidebar p {
+            text-align: center;
+            margin: 10px 5px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.onload = function () {
+            var oBall = document.getElementById("ball");
+            var speedX = 6;
+            var speedY = 6;
+            var oBat = document.getElementById("bat");
+            var oBricks = document.getElementById("bricks");
+            var brickArr = oBricks.childNodes;
+            var flag = true;
+
+            var upBtn = document.getElementById("speedUp");
+            var downBtn = document.getElementById('speedDown');
+            dragX(oBat);
+            createBtn();
+
+            createBrick(20);
+            upBtn.onclick = function () {
+                // document.getElementById("scores").innerHTML = "加速！此时应该分数X2";
+                if (speedX > 0) {
+                    speedX += 1;
+                } else {
+                    speedX -= 1;
+                }
+                if (speedY > 0) {
+                    speedY += 1;
+                } else {
+                    speedY -= 1;
+                }
+
+            }
+            var startbtn = document.getElementById("startbtn");
+
+            downBtn.onclick = function () {
+                // document.getElementById("scores").innerHTML = "减速！此时应该分数//2";
+                if (speedX >= 1) {
+                    speedX -= 1;
+                }
+                if (speedX <= -1) {
+                    speedX += 1;
+                }
+                if (speedY >= 1) {
+                    speedY -= 1;
+                }
+                if (speedY <= -1) {
+                    speedY += 1;
+                }
+            }
+            startbtn.onclick = function () {
+                console.log(speedX, speedY);
+                this.style.visibility = 'hidden';
+                setInterval(function () {
+                    oBall.style.left = oBall.offsetLeft + speedX + 'px';
+                    oBall.style.top = oBall.offsetTop + speedY + "px";
+
+
+                    if (oBall.offsetTop >= 480 || oBall.offsetTop <= 0) {
+                        speedY *= -1;
+                    };
+                    if (oBall.offsetLeft >= 480 || oBall.offsetLeft <= 0) {
+                        speedX *= -1;
+                    };
+                    if (knock(oBall, oBat)) {
+                        speedY *= -1;
+                    }
+
+                    for (var i = 0; i < brickArr.length; i++) {
+                        if (knock(oBall, brickArr[i])) {
+                            speedY *= -1;
+                            document.getElementById("bricks").removeChild(brickArr[i]);
+                            break;
+                        }
+                    }
+                    if (oBall.offsetTop >= 480 && flag) {
+                        alert('GAME OVER!');
+                        flag = false;
+                        window.location.reload();
+                    }
+                    if (noBricks(oBricks) && flag) {
+                        alert("YOU WIN!");
+                        flag = false;
+                        window.location.reload();
+                    }
+
+                }, 30)
+
+            }
+
+        }
+
+        function createBtn() {
+            var startbtn = document.createElement("button");
+            document.getElementById("container").appendChild(startbtn);
+            startbtn.setAttribute('id', 'startbtn');
+        }
+        function dragX(node) {
+            node.onmousedown = function (ev) {
+                // 获取鼠标点击事件对象
+                var e = ev || window.event;
+                //保存按下鼠标时，鼠标和node左边的距离差
+                var offsetX = e.clientX - node.offsetLeft;
+
+                document.onmousemove = function (ev) {
+                    //获取鼠标移动事件对象
+                    var e = ev || window.event;
+                    //当前鼠标位置减去之前的距离差，获得node的位置
+                    var l = e.clientX - offsetX
+                    //防止出界
+                    if (l >= 400) {
+                        l = 400
+                    }
+                    if (l <= 0) {
+                        l = 0
+                    }
+                    node.style.left = l + "px";
+
+                }
+                //鼠标离开，取消move时的设置
+                document.onmouseup = function () {
+                    document.onmousemove = null;
+                }
+            }
+        }
+        function knock(ball, obj) {
+
+            if (ball.offsetTop + ball.offsetHeight > obj.offsetTop && ball.offsetTop < obj.offsetTop + obj.offsetHeight && ball.offsetLeft + ball.offsetWidth > obj.offsetLeft && ball.offsetLeft < obj.offsetLeft + obj.offsetWidth) {
+                return true
+            }
+            else {
+                return false
+            }
+
+        }
+        function noBricks(node) {
+            if (node.childNodes.length != 0) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        function getColor(index){
+            var colorList = ['#8986fa','#9c8ffb','#af97fd','#c2a0fe','#d5a8ff']
+            return colorList[parseInt(index / 4)]
+        }
+        function createBrick(n) {
+            var oBrick = document.getElementById("bricks");
+            var brickArr = document.getElementById("bricks").childNodes;
+            for (var i = 0; i < n; i++) {
+                var node = document.createElement("div");
+                node.style.backgroundColor = getColor(i)
+                oBrick.appendChild(node);
+            }
+
+            for (var i = 0; i < brickArr.length; i++) {
+                brickArr[i].style.left = brickArr[i].offsetLeft + 'px';
+                brickArr[i].style.top = brickArr[i].offsetTop + 'px';
+            }
+            for (var i = 0; i < brickArr.length; i++) {
+                brickArr[i].style.position = 'absolute';
+            }
+        }
+
+    </script>
+    <div id='outContainer'>
+        <!-- <img id="title" src="img/title.png" alt=""> -->
+        <div id='sidebar'>
+            <div><img src="img/speed.png" alt=""></div>
+            <div id="buttons">
+                <button id='speedUp'></button>
+                <button id='speedDown'></button>
+            </div>
+
+            <!-- <div><img src="img/score.png" alt="" id="score"></div>
+            <p id="scores">这儿还没写</p> -->
+        </div>
+        <div id='container'>
+            <div id='bricks'></div>
+            <div id='ball'></div>
+            <div id="bat"></div>
+        </div>
+        
+
+    </div>
+
+</body>
+
+</html>
